@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import uuid
 import json
 
 import websocket
@@ -17,9 +18,15 @@ bigquery_client = bigquery.Client()
 dataset = bigquery_client.dataset(dataset_name)
 table = dataset.table(table_name)
 
+client_id = uuid.uuid4()
+
 def on_message(ws, message):
     dt = datetime.utcnow()
-    data = {'collected_at': dt.isoformat(), 'payload': message}
+    data = {
+        'collected_at': dt.isoformat(),
+        'client_id': str(client_id),
+        'payload': message
+    }
     errors = bigquery_client.create_rows_json(table, [data])
     if errors:
         logging.error(errors)
