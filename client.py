@@ -27,7 +27,11 @@ def on_message(ws, message):
         'client_id': str(client_id),
         'payload': message
     }
-    errors = bigquery_client.create_rows_json(table, [data])
+    errors = bigquery_client.create_rows_json(
+        table,
+        [data],
+        template_suffix='_' + dt.date().strftime('%Y%m%d'),
+    )
     if errors:
         logging.error(errors)
 
