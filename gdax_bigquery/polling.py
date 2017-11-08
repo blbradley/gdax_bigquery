@@ -1,6 +1,5 @@
 import logging
 import uuid
-import json
 from datetime import datetime
 
 from apscheduler.schedulers.background import BlockingScheduler
@@ -21,9 +20,9 @@ table = dataset.table(table_name)
 
 client_id = uuid.uuid4()
 
-def collect():
+def collect(type):
     r = requests.get(
-        'https://api.gdax.com/products/BTC-USD/ticker',
+        f'https://api.gdax.com/products/BTC-USD/{type}',
         timeout=5,
         )
     dt = datetime.utcnow()
@@ -35,7 +34,7 @@ def collect():
     errors = bigquery_client.create_rows_json(
         table,
         [data],
-        template_suffix='_ticker_' + dt.date().strftime('%Y%m%d'),
+        template_suffix=f'_{type}_' + dt.date().strftime('%Y%m%d'),
     )
     if errors:
         logging.error(errors)
@@ -43,13 +42,12 @@ def collect():
 
 if __name__ == '__main__':
     sched = BlockingScheduler()
-    #sched.add_executor('processpool')
-    #if gdax.enable_level2:
-    #    sched.add_job(produce_level2_book, 'interval', seconds=60)
-    #if gdax.enable_level3:
-    #    sched.add_job(produce_level3_book, 'interval', seconds=60)
-    sched.add_job(collect, 'interval', seconds=2)
-    #sched.add_job(produce_trades, 'interval', seconds=2)
+    if gdax.enable_level2:
+        sched.add_job(collect, 'interval', ('level2',), name='collect_level2', seconds=60)
+    if gdax.enable_level3:
+        sched.add_job(collect, 'interval', ('level3',), name='collect_level3', seconds=60)
+    sched.add_job(collect, 'interval', ('ticker',), name='collect_ticker', seconds=2)
+    sched.add_job(collect, 'interval', ('trades',), name='collect_trades', seconds=2)
 
     try:
         sched.start()
