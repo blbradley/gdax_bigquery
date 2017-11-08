@@ -1,3 +1,4 @@
+APScheduler==3.4.0
 cachetools==2.0.1
 certifi==2017.7.27.1
 chardet==3.0.4
@@ -11,8 +12,10 @@ idna==2.6
 protobuf==3.4.0
 pyasn1==0.3.7
 pyasn1-modules==0.1.5
+pytz==2017.3
 requests==2.18.4
 rsa==3.4.2
 six==1.11.0
+tzlocal==1.4
 urllib3==1.22
 websocket-client==0.44.0
